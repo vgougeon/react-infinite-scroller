@@ -343,6 +343,15 @@ var InfiniteScroll = (function(_Component) {
       }
     },
     {
+      key: 'resetPage',
+      value: function resetPage() {
+        this.pageLoaded = this.props.pageStart;
+        if (this.props.initialLoad) {
+          this.scrollListener();
+        }
+      }
+    },
+    {
       key: 'render',
       value: function render() {
         var _this2 = this;
