@@ -245,6 +245,13 @@ export default class InfiniteScroll extends Component {
     return el.offsetTop + this.calculateTopPosition(el.offsetParent);
   }
 
+  resetPage() {
+    this.pageLoaded = this.props.pageStart;
+    if (this.props.initialLoad) {
+      this.scrollListener();
+    }
+  }
+
   render() {
     const renderProps = this.filterProps(this.props);
     const {
