@@ -38,6 +38,7 @@ export default class InfiniteScroll extends Component {
     this.scrollListener = this.scrollListener.bind(this);
     this.eventListenerOptions = this.eventListenerOptions.bind(this);
     this.mousewheelListener = this.mousewheelListener.bind(this);
+    this.ready = true;
   }
 
   componentDidMount() {
@@ -219,9 +220,18 @@ export default class InfiniteScroll extends Component {
       this.detachScrollListener();
       this.beforeScrollHeight = parentNode.scrollHeight;
       this.beforeScrollTop = parentNode.scrollTop;
+
+      //Check if promise is not currently being resolved and if there is still data to find
+      if (!this.ready || !this.props.hasMore) return;
+      this.ready = false;
+
       // Call loadMore after detachScrollListener to allow for non-async loadMore functions
       if (typeof this.props.loadMore === 'function') {
-        this.props.loadMore((this.pageLoaded += 1));
+        // Loadmore has to be a promise
+        this.props.loadMore((this.pageLoaded += 1)).then(() => {
+          this.ready = true;
+          this.scrollListener();
+        });
         this.loadMore = true;
       }
     }

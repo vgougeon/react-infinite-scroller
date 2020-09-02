@@ -98,6 +98,7 @@ var InfiniteScroll = (function(_Component) {
     _this.scrollListener = _this.scrollListener.bind(_this);
     _this.eventListenerOptions = _this.eventListenerOptions.bind(_this);
     _this.mousewheelListener = _this.mousewheelListener.bind(_this);
+    _this.ready = true;
     return _this;
   }
 
@@ -277,6 +278,8 @@ var InfiniteScroll = (function(_Component) {
     {
       key: 'scrollListener',
       value: function scrollListener() {
+        var _this2 = this;
+
         var el = this.scrollComponent;
         var scrollEl = window;
         var parentNode = this.getParentElement(el);
@@ -312,9 +315,18 @@ var InfiniteScroll = (function(_Component) {
           this.detachScrollListener();
           this.beforeScrollHeight = parentNode.scrollHeight;
           this.beforeScrollTop = parentNode.scrollTop;
+
+          //Check if promise is not currently being resolved and if there is still data to find
+          if (!this.ready || !this.props.hasMore) return;
+          this.ready = false;
+
           // Call loadMore after detachScrollListener to allow for non-async loadMore functions
           if (typeof this.props.loadMore === 'function') {
-            this.props.loadMore((this.pageLoaded += 1));
+            // Loadmore has to be a promise
+            this.props.loadMore((this.pageLoaded += 1)).then(function() {
+              _this2.ready = true;
+              _this2.scrollListener();
+            });
             this.loadMore = true;
           }
         }
@@ -354,7 +366,7 @@ var InfiniteScroll = (function(_Component) {
     {
       key: 'render',
       value: function render() {
-        var _this2 = this;
+        var _this3 = this;
 
         var renderProps = this.filterProps(this.props);
 
@@ -388,7 +400,7 @@ var InfiniteScroll = (function(_Component) {
           ]);
 
         props.ref = function(node) {
-          _this2.scrollComponent = node;
+          _this3.scrollComponent = node;
           if (ref) {
             ref(node);
           }
